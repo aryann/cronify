@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+import argparse
+import logging
+import os
+import shutil
+import sys
+import tempfile
+import pkg_resources
+
+
+def _get_args():
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--keep-temp-dir', action='store_true',
+                        default=False,
+                        help='If provided, the temporary directory is not deleted.')
+
+    return parser.parse_args()
+
+
+_DATA_DIR = os.path.join(os.path.dirname(
+    os.path.dirname(os.path.realpath(__file__))), 'data')
+
+_DEPS = [
+    'flask',
+    'gunicorn',
+]
+
+
+def _copy_files(dest):
+    shutil.copytree(src=os.getcwd(), dst=dest, dirs_exist_ok=True)
+    shutil.copytree(src=_DATA_DIR, dst=dest, dirs_exist_ok=True)
+
+
+def _write_requirements(dest):
+    with open(os.path.join(dest, 'requirements.txt'), 'a') as f:
+        f.writelines(f'{dep}\n' for dep in _DEPS)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    args = _get_args()
+
+    dest = tempfile.mkdtemp(prefix='cronify-')
+    try:
+        logging.info('Files will be staged in %s', dest)
+        _copy_files(dest)
+        _write_requirements(dest)
+
+    finally:
+        if not args.keep_temp_dir:
+            shutil.rmtree(dest)
