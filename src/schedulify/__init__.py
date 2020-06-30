@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import argparse
 import json
 import logging
@@ -46,7 +45,7 @@ _DEPS = (
 )
 
 
-class CronifyError(Exception):
+class SchedulifyError(Exception):
     pass
 
 
@@ -72,10 +71,10 @@ def _write_requirements(dest):
 
 def _get_configs():
     try:
-        with open(os.path.join(os.getcwd(), 'cronify.json')) as f:
+        with open(os.path.join(os.getcwd(), 'schedulify.json')) as f:
             return json.load(f)
     except FileNotFoundError:
-        raise CronifyError('Directory is missing cronify.json.')
+        raise SchedulifyError('Directory is missing schedulify.json.')
 
 
 def _get_handler_name(module, function):
@@ -147,14 +146,14 @@ def _deploy(configs, dest):
                                 stdout=sys.stdout,
                                 stderr=sys.stderr)
         if output.returncode != 0:
-            raise CronifyError('gcloud command failed.')
+            raise SchedulifyError('gcloud command failed.')
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
     args = _get_args()
 
-    dest = tempfile.mkdtemp(prefix='cronify-')
+    dest = tempfile.mkdtemp(prefix='schedulify-')
     try:
         if args.keep_temp_dir:
             sys.stderr.write(f'Staging area: {dest}\n')
@@ -167,7 +166,7 @@ def main():
 
         _deploy(configs, dest)
 
-    except CronifyError as e:
+    except SchedulifyError as e:
         sys.stderr.write(str(e))
         sys.stderr.write('\n')
         sys.exit(1)
