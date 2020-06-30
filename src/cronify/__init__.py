@@ -33,14 +33,17 @@ if __name__ == '__main__':
 """
 
 
-_DATA_DIR = os.path.join(os.path.dirname(
-    os.path.dirname(os.path.realpath(__file__))), 'data')
+_DATA_DIR = os.path.dirname(__file__)
+_DATA_FILES = (
+    'Dockerfile',
+    '.dockerignore',
+)
 
 
-_DEPS = [
+_DEPS = (
     'flask',
     'gunicorn',
-]
+)
 
 
 class CronifyError(Exception):
@@ -58,7 +61,8 @@ def _get_args():
 
 def _copy_files(dest):
     shutil.copytree(src=os.getcwd(), dst=dest, dirs_exist_ok=True)
-    shutil.copytree(src=_DATA_DIR, dst=dest, dirs_exist_ok=True)
+    for f in _DATA_FILES:
+        shutil.copy(src=os.path.join(_DATA_DIR, f), dst=dest)
 
 
 def _write_requirements(dest):
@@ -142,7 +146,7 @@ def _deploy(configs, dest):
             raise CronifyError('gcloud command failed.')
 
 
-if __name__ == '__main__':
+def main():
     logging.basicConfig(level=logging.INFO)
     args = _get_args()
 
@@ -165,3 +169,7 @@ if __name__ == '__main__':
     finally:
         if not args.keep_temp_dir:
             shutil.rmtree(dest)
+
+
+if __name__ == '__main__':
+    main()

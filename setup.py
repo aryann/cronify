@@ -3,9 +3,24 @@ import setuptools
 setuptools.setup(
     name='cronify',
     version='0.0.1',
-    packages=setuptools.find_packages(),
-    scripts=[
-        'bin/cronify',
+    author='Aryan Naraghi',
+    author_email='aryan.naraghi@gmail.com',
+    packages=[
+        'cronify',
     ],
-    include_package_data=True,
+    package_dir={
+        '': 'src',
+    },
+    package_data={
+        'cronify': [
+            'Dockerfile',
+            '.dockerignore',
+        ],
+    },
+    python_requires='>=3.6',
+    entry_points={
+        'console_scripts': [
+            'cronify=cronify:main',
+        ],
+    },
 )
