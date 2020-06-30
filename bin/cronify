@@ -42,6 +42,10 @@ _DEPS = [
 ]
 
 
+class CronifyError(Exception):
+    pass
+
+
 def _get_args():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--keep-temp-dir', action='store_true',
@@ -62,8 +66,11 @@ def _write_requirements(dest):
 
 
 def _get_configs():
-    with open(os.path.join(os.getcwd(), 'cronify.json')) as f:
-        return json.load(f)
+    try:
+        with open(os.path.join(os.getcwd(), 'cronify.jsona')) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise CronifyError('Directory is missing cronify.json.')
 
 
 def _get_handler_name(module, function):
@@ -112,6 +119,11 @@ if __name__ == '__main__':
 
         _copy_files(dest)
         _write_requirements(dest)
+
+    except CronifyError as e:
+        sys.stderr.write(str(e))
+        sys.stderr.write('\n')
+        sys.exit(1)
 
     finally:
         if not args.keep_temp_dir:
