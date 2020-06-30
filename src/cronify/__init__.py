@@ -102,6 +102,8 @@ def _generate_server(configs):
                     return ''
             """))
 
+        sys.stderr.write(f'Generating handler: /{handler_name}\n')
+
     return _SERVER_TEMPLATE.format(
         imports='\n'.join(imports), handlers='\n'.join(handlers))
 
@@ -115,7 +117,8 @@ def _write_server(configs, dest):
 def _deploy(configs, dest):
     project_id = configs['project-id']
     region = configs['region']
-    image_name = f'gcr.io/{project_id}/{os.path.basename(os.getcwd())}'
+    service_name = os.path.basename(os.getcwd())
+    image_name = f'gcr.io/{project_id}/{service_name}'
 
     commands = [
         [
@@ -130,18 +133,19 @@ def _deploy(configs, dest):
             f'--project={project_id}',
             'run',
             'deploy',
+            service_name,
             f'--region={region}',
             f'--image={image_name}',
             '--platform=managed',
+            '--no-allow-unauthenticated',
         ]
     ]
 
     for command in commands:
         output = subprocess.run(command,
                                 cwd=dest,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
-        sys.stderr.write(output.stdout.decode('utf'))
+                                stdout=sys.stdout,
+                                stderr=sys.stderr)
         if output.returncode != 0:
             raise CronifyError('gcloud command failed.')
 
@@ -152,7 +156,9 @@ def main():
 
     dest = tempfile.mkdtemp(prefix='cronify-')
     try:
-        logging.info('Files will be staged in %s', dest)
+        if args.keep_temp_dir:
+            sys.stderr.write(f'Staging area: {dest}\n')
+
         configs = _get_configs()
         _write_server(configs, dest)
 
