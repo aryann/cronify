@@ -12,4 +12,4 @@ CMD exec gunicorn \
     --threads=4 \
     --log-file=- \
     --access-logfile=- \
-    run_as_server:app
+    cronify_entry:app
