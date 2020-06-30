@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import textwrap
@@ -67,7 +68,7 @@ def _write_requirements(dest):
 
 def _get_configs():
     try:
-        with open(os.path.join(os.getcwd(), 'cronify.jsona')) as f:
+        with open(os.path.join(os.getcwd(), 'cronify.json')) as f:
             return json.load(f)
     except FileNotFoundError:
         raise CronifyError('Directory is missing cronify.json.')
@@ -107,6 +108,40 @@ def _write_server(configs, dest):
         f.write(server)
 
 
+def _deploy(configs, dest):
+    project_id = configs['project-id']
+    region = configs['region']
+    image_name = f'gcr.io/{project_id}/{os.path.basename(os.getcwd())}'
+
+    commands = [
+        [
+            'gcloud',
+            f'--project={project_id}',
+            'builds',
+            'submit',
+            f'--tag={image_name}',
+        ],
+        [
+            'gcloud',
+            f'--project={project_id}',
+            'run',
+            'deploy',
+            f'--region={region}',
+            f'--image={image_name}',
+            '--platform=managed',
+        ]
+    ]
+
+    for command in commands:
+        output = subprocess.run(command,
+                                cwd=dest,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT)
+        sys.stderr.write(output.stdout.decode('utf'))
+        if output.returncode != 0:
+            raise CronifyError('gcloud command failed.')
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     args = _get_args()
@@ -119,6 +154,8 @@ if __name__ == '__main__':
 
         _copy_files(dest)
         _write_requirements(dest)
+
+        _deploy(configs, dest)
 
     except CronifyError as e:
         sys.stderr.write(str(e))
