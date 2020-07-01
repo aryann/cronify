@@ -6,6 +6,8 @@ with minimal boilerplate.
 NOTE: Schedulify is currently under development, so the full vision has not been
 realized yet. If you use this tool, please expect significant changes.
 
+[TOC]
+
 ## Motivation
 
 Google Cloud Platform offers Cloud Scheduler for running tasks according to a
@@ -111,3 +113,17 @@ the tool building the image and deploying it to Cloud Run.
    use-cases and allows us to substantially reduce the complexity of
    containerizing an arbitrary Python app.
 *  Add support for configuring Cloud Scheduler.
+
+## Development Guide
+
+### Performing a Release
+
+Refer to [Python's Packaging
+documentation](https://packaging.python.org/guides/distributing-packages-using-setuptools/#packaging-your-project)
+for full details on performing a release. Assuming all tools are set up, run the
+following to push a new package to PyPI:
+
+```
+python setup.py bdist_wheel
+twine upload dist/*
+```
