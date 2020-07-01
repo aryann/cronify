@@ -6,8 +6,6 @@ with minimal boilerplate.
 NOTE: Schedulify is currently under development, so the full vision has not been
 realized yet. If you use this tool, please expect significant changes.
 
-[TOC]
-
 ## Motivation
 
 Google Cloud Platform offers Cloud Scheduler for running tasks according to a
