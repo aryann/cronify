@@ -9,7 +9,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 
 setuptools.setup(
     name='schedulify',
-    version='0.0.2',
+    version='0.0.3',
     author='Aryan Naraghi',
     author_email='aryan.naraghi@gmail.com',
     description=('Schedule Python functions on Google Cloud Platform '
